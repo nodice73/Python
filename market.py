@@ -5,7 +5,8 @@ import csv, re, pprint
 responders = dict()
 n_threads = 0 
 n_replies = 0
-files = ['revised questions and answers.csv', 'new messages.csv']
+files = ['/home/nodice/Desktop/revised questions and answers for article.csv',
+         '/home/nodice/Desktop/new messages.csv']
 
 for file in files:
     with open(file) as csvfile:
@@ -14,7 +15,7 @@ for file in files:
             n_threads += 1
             responses = row[3].split('\n')
             for response in responses:
-                m = re.match('^([^\s|\d]+[a-zA-Z ]+?):', response)
+                m = re.match('^([^\s|\d]+(\w|\s)+?):', response)
                 if m:
                     if re.search('http', m.group(1)):
                         continue
