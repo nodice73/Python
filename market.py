@@ -3,6 +3,8 @@
 import csv, re, pprint
 
 responders = dict()
+keyword_counts = dict()
+code_counts = dict()
 n_threads = 0 
 total_replies = 0
 three_plus = 0
@@ -31,7 +33,8 @@ for file in files:
         for row in r:
             n_threads += 1
             thread_replies = 0
-            response_lines = row[3].split('\n')
+            response = row[3]
+            response_lines = response.split('\n')
             for line in response_lines:
                 m = re.match('^([^\s|\d]+(\w|\s)+?):', line)
                 if m:
