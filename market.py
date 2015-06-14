@@ -13,7 +13,8 @@ class MarketAnalysis(object):
         self.files = [
                 #'/home/nodice/Desktop/revised questions and answers for article.csv',
                 '/home/nodice/Desktop/clean code.csv',
-                '/home/nodice/Desktop/new messages.csv']
+                #'/home/nodice/Desktop/new messages.csv'
+                ]
         self.keyword_counts = {
                 'regulations': 0,
                 'expert': 0,
@@ -37,13 +38,12 @@ class MarketAnalysis(object):
             with open(file) as csvfile:
                 r = csv.reader(csvfile)
                 for row in r:
-                    filtered = filter(None, row)
-                    if filtered:
-                        print row
+                    if filter(None, row): # remove empty rows
                         self.n_threads += 1
                         self.thread_replies = 0
                         response = row[3]
 
+                        # find keywords
                         for k in iter(self.keyword_counts):
                             if k in response:
                                 self.keyword_counts[k] += 1
@@ -73,7 +73,8 @@ class MarketAnalysis(object):
             'threads: {}, replies: {}. {:.2f} replies per thread.').format(
                 self.n_threads, self.total_replies,
                 float(self.total_replies)/self.n_threads))
-        print(('threads with 3+ responses: {}').format(self.three_plus))
+        print(('{} threads with 3+ responses').format(self.three_plus))
+        print(('{} unique responders.').format(len(self.responders)))
         self.pp.pprint(sorted(self.keyword_counts.items(),
             key=lambda x:x[1], reverse=True))
         self.pp.pprint(self.responders)
