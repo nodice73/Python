@@ -2,58 +2,82 @@
 
 import csv, re, pprint
 
-responders = dict()
-keyword_counts = dict()
-code_counts = dict()
-n_threads = 0 
-total_replies = 0
-three_plus = 0
-files = ['/home/nodice/Desktop/revised questions and answers for article.csv',
-         '/home/nodice/Desktop/new messages.csv']
-keywords = ['regulations',
-            'expert',
-            'health',
-            'poverty',
-            'class',
-            'privilege',
-            'alternative food',
-            'legitimate',
-            'leadership',
-            'leader',
-            'learning',
-            'outreach',
-            'equality',
-            'unity',
-            'progress',
-            'growth']
+class MarketAnalysis(object):
+    def __init__(self):
+        self.pp = pprint.PrettyPrinter(indent=4)
+        self.responders = dict()
+        self.code_counts = dict()
+        self.n_threads = 0
+        self.total_replies = 0
+        self.three_plus = 0
+        self.files = [
+                #'/home/nodice/Desktop/revised questions and answers for article.csv',
+                '/home/nodice/Desktop/clean code.csv',
+                '/home/nodice/Desktop/new messages.csv']
+        self.keyword_counts = {
+                'regulations': 0,
+                'expert': 0,
+                'health': 0,
+                'poverty': 0,
+                'class': 0,
+                'privilege': 0,
+                'alternative food': 0,
+                'legitimate': 0,
+                'leadership': 0,
+                'leader': 0,
+                'learning': 0,
+                'outreach': 0,
+                'equality': 0,
+                'unity': 0,
+                'progress': 0,
+                'growth': 0}
 
-for file in files:
-    with open(file) as csvfile:
-        r = csv.reader(csvfile)
-        for row in r:
-            n_threads += 1
-            thread_replies = 0
-            response = row[3]
-            response_lines = response.split('\n')
-            for line in response_lines:
-                m = re.match('^([^\s|\d]+(\w|\s)+?):', line)
-                if m:
-                    if re.search('http', m.group(1)):
-                        continue
-                    word_count = len(re.findall('\w+', m.group(1)))
-                    if word_count < 4:
-                        thread_replies += 1
-                        if m.group(1) in responders:
-                            responders[m.group(1)] += 1
-                        else:
-                            responders[m.group(1)] = 1
-            total_replies += thread_replies
-            if thread_replies >= 3:
-                three_plus += 1
+    def analyze(self):
+        for file in self.files:
+            with open(file) as csvfile:
+                r = csv.reader(csvfile)
+                for row in r:
+                    filtered = filter(None, row)
+                    if filtered:
+                        print row
+                        self.n_threads += 1
+                        self.thread_replies = 0
+                        response = row[3]
 
-pp = pprint.PrettyPrinter(indent=4)
-responders = sorted(responders.items(), key=lambda x:x[1], reverse=True)
-print 'threads: {}, replies: {}. {:.2f} replies per thread.'.format(n_threads,
-      total_replies, float(total_replies)/n_threads)
-print 'threads with 3+ responses: {}'.format(three_plus)
-pp.pprint(responders)
+                        for k in iter(self.keyword_counts):
+                            if k in response:
+                                self.keyword_counts[k] += 1
+
+
+                        response_lines = response.split('\n')
+                        for line in response_lines:
+                            m = re.match('^([^\s|\d]+(\w|\s)+?):', line)
+                            if m:
+                                if re.search('http', m.group(1)):
+                                    continue
+                                word_count = len(re.findall('\w+', m.group(1)))
+                                if word_count < 4:
+                                    self.thread_replies += 1
+                                    if m.group(1) in self.responders:
+                                        self.responders[m.group(1)] += 1
+                                    else:
+                                        self.responders[m.group(1)] = 1
+                        self.total_replies += self.thread_replies
+                        if self.thread_replies >= 3:
+                            self.three_plus += 1
+
+    def print_result(self):
+        self.responders = sorted(self.responders.items(),
+                                 key=lambda x:x[1], reverse=True)
+        print((
+            'threads: {}, replies: {}. {:.2f} replies per thread.').format(
+                self.n_threads, self.total_replies,
+                float(self.total_replies)/self.n_threads))
+        print(('threads with 3+ responses: {}').format(self.three_plus))
+        self.pp.pprint(sorted(self.keyword_counts.items(),
+            key=lambda x:x[1], reverse=True))
+        self.pp.pprint(self.responders)
+
+market = MarketAnalysis()
+market.analyze()
+market.print_result()
