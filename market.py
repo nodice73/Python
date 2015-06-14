@@ -36,12 +36,12 @@ class MarketAnalysis(object):
     def analyze(self):
         for file in self.files:
             with open(file) as csvfile:
-                r = csv.reader(csvfile)
+                r = csv.DictReader(csvfile)
                 for row in r:
-                    if filter(None, row): # remove empty rows
+                    if filter(None, row.values()): # remove empty rows
                         self.n_threads += 1
                         self.thread_replies = 0
-                        response = row[3]
+                        response = row['answers']
 
                         # find keywords
                         for k in iter(self.keyword_counts):
@@ -49,6 +49,11 @@ class MarketAnalysis(object):
                                 self.keyword_counts[k] += 1
 
 
+                        # find codes
+                        codes = row['codes'].split(';')
+                        print codes
+
+                        # split response cell by responders
                         response_lines = response.split('\n')
                         for line in response_lines:
                             m = re.match('^([^\s|\d]+(\w|\s)+?):', line)
