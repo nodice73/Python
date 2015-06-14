@@ -50,8 +50,13 @@ class MarketAnalysis(object):
 
 
                         # find codes
-                        codes = row['codes'].split(';')
-                        print codes
+                        codes = filter(None,
+                                       [x.lower().strip() for x in row['codes'].split(';')])
+                        for code in codes:
+                            if code in self.code_counts:
+                                self.code_counts[code] += 1
+                            else:
+                                self.code_counts[code] = 1
 
                         # split response cell by responders
                         response_lines = response.split('\n')
@@ -71,18 +76,30 @@ class MarketAnalysis(object):
                         if self.thread_replies >= 3:
                             self.three_plus += 1
 
+                self.responders     = sort_by_val(self.responders)
+                self.keyword_counts = sort_by_val(self.keyword_counts)
+                self.code_counts    = sort_by_val(self.code_counts)
+
     def print_result(self):
-        self.responders = sorted(self.responders.items(),
-                                 key=lambda x:x[1], reverse=True)
         print((
             'threads: {}, replies: {}. {:.2f} replies per thread.').format(
                 self.n_threads, self.total_replies,
                 float(self.total_replies)/self.n_threads))
         print(('{} threads with 3+ responses').format(self.three_plus))
         print(('{} unique responders.').format(len(self.responders)))
-        self.pp.pprint(sorted(self.keyword_counts.items(),
-            key=lambda x:x[1], reverse=True))
+
+        print '\nKeywords:'
+        self.pp.pprint(self.keyword_counts)
+
+        print '\nCodes:'
+        self.pp.pprint(self.code_counts)
+
+        print '\nResponders:'
         self.pp.pprint(self.responders)
+
+def sort_by_val(dic):
+    return sorted(dic.items(), key=lambda x:x[1], reverse=True)
+
 
 market = MarketAnalysis()
 market.analyze()
